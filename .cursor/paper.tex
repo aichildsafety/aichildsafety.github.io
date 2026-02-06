@@ -1,0 +1,647 @@
+\begin{abstract}
+    Modern artificial intelligence (AI) systems  present profound new risks to child safety. AI is increasingly being misused to create AI-generated child sexual abuse material, facilitate child sexual exploitation, and reduce barriers to harm. In this paper, we argue that protecting children from AI-facilitated abuse requires new approaches to AI safety. Existing safety techniques assume data accessibility, transparency, and evaluation practices that are incompatible with the ethical and legal constraints surrounding child sexual abuse material. We examine how these constraints create new technical challenges, such as limitations on dataset auditing, red teaming, and fine-tuning prevention. In turn, we outline \textit{15 open problems} in child safety across the AI development lifecycle, from dataset curation and model design to deployment and long-term maintenance. We propose targeted recommendations for researchers, developers, and policymakers to bridge the gap between theoretical AI safety and the realities of child protection. Our work aims to reframe child safety as a central, safety-critical dimension for AI research, motivating work that translates responsible AI principles into concrete safeguards against the exploitation of children.
+    \end{abstract}
+
+    \vspace{-.2in}
+    \section{Introduction}
+    Artificial intelligence (AI) systems have achieved remarkable capabilities in content creation.
+    However, these same capabilities increasingly pose risks to children, including facilitating child sexual abuse and exploitation (CSAE), particularly via the development of AI-generated child sexual abuse material (AIG-CSAM) \cite{internet2023ai,iwf2024,paltieli,thiel2023generative}.
+    This misuse represents a critical challenge at the intersection of AI safety, child protection, and technical system design---one that most existing AI safety frameworks inadequately address.
+
+    The scope and severity of this problem are substantial. The National Center for Missing and Exploited Children (NCMEC) received more than 440,000 reports of AI-generated material related to CSAE in the first half of 2025 alone~\cite{2025report}, compared to 7,000  reports in 2023-2024, and the Internet Watch Foundation (IWF) observed a 400\% increase in AIG-CSAM reports since 2024~\cite{iwfblog,iwf2024}.
+    A recent study found that 13\% of U.S. sexual extortion victims reported that the perpetrator used AI to create blackmail material \cite{thorn2025sextortion}, and a 2025 survey of Australian young people found that 41\% of sexual extortion victims reported that the material used to blackmail them had been digitally manipulated~\cite{wolbers2025}.
+    In the U.S., 1 in 17 teenagers aged 13--17 report having been victimized by deepfake nude images~\cite{thorn24}.
+    AIG-CSAM has thus been recognized by the AI safety community as a critical area for intervention, with immediate, quantifiable marginal risk~\cite{kapoor2024societal}.
+
+    However, despite the known risks of AIG-CSAM, many existing techniques from AI safety and secure \& privacy-preserving machine learning cannot be directly used for AIG-CSAM prevention, detection, and mitigation.
+    Paradoxically, in part because child safety is an important and established area of concern, there are unique constraints and restrictions surrounding CSAM access/usage.
+    These restrictions are \emph{ethical and necessary}, but create complications for researchers and practitioners seeking to develop and assess AI safety solutions. This motivates our main position (below), which we explore in detail in this work:
+
+
+    \vspace{-.5mm}
+    \begin{posbox}{Main Position}{
+    \textit{Existing AI safety research makes assumptions that do not match the legal and ethical constraints of safety applications preventing child sexual abuse and exploitation. Bridging this gap by solving open sociotechnical problems will be critical to make AI safety solutions effective for child safety in practice.}}
+    \end{posbox}
+    \vspace{-.5mm}
+
+
+    We outline current industry consensus on solutions to address AIG-CSAM~\cite{thornsafetybydesign}, pointing out gaps between {assumptions} made by state-of-the-art mitigations
+    and {practical} limitations. We then highlight 15 open problems (9 in the body, 6 in Appendix \ref{app:additional_openproblems}) spanning model development ($\S$\ref{sec:develop}), deployment ($\S$\ref{sec:deploy}), and maintenance ($\S$\ref{sec:maintain}), which represent critical research and policy priorities where advances could have immediate impact on protecting children. Finally, we provide recommendations for researchers, AI providers, and policymakers to address these open problems and bridge ecosystem gaps.
+
+
+    \begin{table*}[t!]
+        \centering
+        \begin{tabular}{r  cccc}
+            \toprule
+              & \textbf{General Public} & \textbf{AI Developers/Providers} & \textbf{Reporting Hotlines} & \textbf{Law Enforcement} \\
+            \midrule
+            Can legally access CSAM & No & No* & Yes & Yes \\
+            Can access hashes & No & Yes & Yes & Yes \\
+            Can train on CSAM & No & No* & Yes & Yes \\
+            Can generate CSAM & No & No & No & Yes \\
+             \bottomrule
+        \end{tabular}
+        \caption{CSAM access, usage, and generation capabilities for various actors. The inability to access CSAM as well as generate and train on CSAM data can limit the application of existing tools in AI safety. *While AI developers and providers generally can't access or train on CSAM, there are specific, limited cases where access may be permissible (see Section~\ref{background:access}).}
+        \label{tab:csam_access}
+        \vspace{-.2in}
+    \end{table*}
+
+    \section{Background}
+    Generative AI enables non-experts to create realistic digital media at unprecedented scale. The AI safety community has raised concerns about resulting risks, such as bias propagation~\cite{birhane2023into}, disinformation~\cite{musser2023cost}, bioterrorism~\cite{peppin2025reality}, job displacement~\cite{hazra2025position}, and cybercrime~\cite{hazell2023spear}.
+
+    In this work, we specifically examine generative AI risks for \textit{child safety}, focusing on photo-realistic child sexual abuse material (CSAM). AIG-CSAM presents critical harms to child safety. It complicates victim identification by expanding the volume of material that law enforcement must navigate to locate children in abuse scenarios~\cite{thiel2023generative,internet2023ai}. It enables re-victimization as bad actors can fine-tune models on existing CSAM to generate content imitating specific victims while producing new poses and acts of violence~\cite{thiel2023generative,internet2023ai}. It also broadens the pool of victims for sexual extortion, with offenders using image editing tools to sexualize benign depictions of children for such schemes~\cite{fbiPSA}.
+
+
+    Both preventive and reactive measures around AIG-CSAM are necessary to improve child safety: civil society~\cite{thornsafetybydesignblog}, industry~\cite{meta}, and regulatory bodies~\cite{TakeItDownAct} have all pursued relevant efforts. However, as we show, CSAM imposes unique constraints on existing AI safety techniques.  To illustrate the resulting open research gaps, in this section  we first describe what makes AI child safety particularly challenging ($\S$\ref{background:challenges}) and detail key organizations involved in intervention efforts ($\S$\ref{background:access}).
+
+    Throughout this work, we note that we focus on AI-generated imagery as the key modality of interest, and primarily take a U.S./western perspective when considering legal constraints that may impact safety techniques. We discuss limitations, broader perspectives, and alternate views in $\S$~\ref{sec:alternate} and $\S$~\ref{sec:conclusion}, and provide a detailed discussion of related work in App.~\ref{sec:relatedwork}.
+
+
+    \subsection{What makes AI child safety challenging?}
+    \label{background:challenges}
+    The illegal and sensitive nature of CSAM, alongside other guardrails related to children's data, creates unique challenges for AI safety. Below we highlight several underlying challenges which we will revisit throughout the paper:
+
+    \chipData\ --- \textbf{Data restrictions.} CSAM is illegal in most countries, with
+    legislation such as COPPA and GDPR establishing strict privacy safeguards for children's data~\cite{FTC_COPPA,gdpreu2018whatgdpr,USC18_possession}. As we show, these data access restrictions are at odds with many standard AI safety approaches, which require access to training and/or evaluation data.
+
+    \chipEval\ --- \textbf{Evaluation restrictions.} Evaluation and red teaming methods typically rely on model prompting to assess model behavior and capabilities, but intentionally generating AIG-CSAM is also illegal in the U.S. ~\cite{USC18_protect}. Similarly, standardized CSAM evaluation datasets do not exist, as it is illegal to access this data.
+
+    \chipAdv\ --- \textbf{Adversarial and opaque environment with strict guarantees.}
+    Child safety demands strong guarantees, as AIG-CSAM output is intrinsically illegal in most countries and can directly harm specific children. However, these guarantees can be difficult to achieve, as CSAE offenders collaborate to actively circumvent safeguards, while AI system developers typically only disclose high-level descriptions of safety mechanisms ($\S$\ref{app:deployment}).
+
+    \chipWell\ --- \textbf{Wellness implications.} CSAM exposure and the psychological demands of adversarial assessment pose substantial risks, including trauma and PTSD~\cite{spence23}. This can make it challenging to apply safety techniques requiring significant human involvement.
+
+    \vspace{-.05in}
+    \subsection{Organizations and access assumptions}
+    \label{background:access}
+    \vspace{-.05in}
+    Three key groups make up the AIG-CSAM prevention and response ecosystem (see Table \ref{tab:csam_access} for a summary).
+
+
+    \textbf{AI Developers and Providers.} AI developers (individuals/organizations that build AI technology) and AI providers (platforms that host  AI tools) both have CSAM reporting and retention obligations under U.S. law~\cite{reportact}. They can access CSAM hashes via institutions like NCMEC for matching and reporting. In certain cases, they may be allowed to extract embeddings from CSAM detected on their platforms to train detection methods~\cite{googlecst}*, but direct access would require partnership with law enforcement or reporting hotlines.
+
+    \textbf{Reporting Hotlines.} Hotlines (e.g. NCMEC, IWF) are authorized to receive and process CSAM reports, to facilitate removal from online platforms and support LE investigation and prosecution efforts. These organizations legally house CSAM, enabling hash sharing, victim ID, and abuse prevention efforts. While they can provide scoped, secure access to CSAM to other institutions building CSAM prevention and detection technology, they cannot directly assess generative AI models for CSAM capabilities.
+
+    \textbf{Law Enforcement (LE).} Finally, LE has the legal authority to investigate, collect, and analyze CSAM as evidence while working to identify victims, apprehend perpetrators, and disrupt child exploitation networks. However, although they have the ability to train detection methods and assess AI models for CSAM capabilities, they may lack the budget or technical expertise for these efforts.
+
+    As we will see, the restrictions surrounding CSAM access for these various groups (particularly for AI developers/providers) have wide-ranging impacts on the use of existing safety tools related to AI system development ($\S$\ref{sec:develop}), deployment ($\S$\ref{sec:deploy}), and maintenance ($\S$\ref{sec:maintain}).
+
+    \vspace{-2mm}
+    \section{Developing Safe Models by Design}
+    \label{sec:develop}
+
+
+    {Developing} safe generative AI models requires proactively addressing child safety risks before and during training. Large-scale datasets used to train generative models are often scraped from the Internet with \textit{minimal cleaning} \cite{bommasani2021opportunities}, leading to cases where datasets
+    used to train popular models
+    were found to contain CSAM \cite{magid2024you, thiel2023identifying}.  Generative models may also produce harmful outputs through \textit{concept fusion}, combining attributes from separate training examples (e.g., adult pornographic content and benign child depictions) \cite{okawa2023compositional, zhang2021can}.
+    Furthermore, by using generative models to partially edit CSAM, offenders can make it difficult to determine whether material depicts active abuse, recovered victim-survivors, or deepfakes.
+
+
+    \vspace{-2mm}
+    \subsection {Current Approaches}
+    Currently, model developers can use \textit{allowed/disallowed website lists} for data curation to avoid sites hosting CSAM, \cite{thorn2025safetybydesignupdate},
+    and can detect CSAM in training data by hash matching against third-party CSAM databases and using CSAM classifiers \cite{lee2020detecting, googlecst, thornsafetybydesignblog}. One approach to address concept fusion is \textit{NSFW filtering}, which considers removing adult material from datasets prior to model development \cite{thornsafetybydesign}.
+
+
+    Developers also use \textit{red teaming} to find harmful content queries, patching exploits before model release \cite{ganguli2022red, google2023red}. Directly prompting for AIG-CSAM is illegal in the U.S., so developers report either testing \textit{proxy concepts} \cite{thornsafetybydesign} or \textit{avoiding} such testing entirely \cite{grossman2025csam}.
+
+
+    \textit{Content provenance} solutions have also been implemented to support victim ID efforts. These tools  provide a feedback mechanism for researchers, AI providers, and policy makers. By allowing stakeholders to become aware of the models that are producing problematic output, systemic issues can be addressed in existing mitigations. Current approaches include \textit{C2PA} \cite{C2PA_Org} (an open metadata-based standard for digital content origin and edits) and \textit{watermarking} \cite{yu2021artificial, wen2023tree, fernandez2023stable}.
+
+
+    \vspace{-2mm}
+    \subsection{Open Problems}
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 1: Partial data cleaning}}
+    {\chipData\ \chipEval}
+    {How does data cleaning affect a generative model's ability to depict a concept? To what degree can partial cleaning guarantee that a model cannot depict CSAM?}
+    \end{pboxchipped}
+    \label{sec:develop:partial-data-cleaning}
+
+    Guaranteeing complete CSAM removal is difficult due to imperfect detection technology, scale of data, and moderator wellness concerns. Determining whether imperfect removal (e.g., 99.9\%) can prevent text-to-image models from learning to generate CSAM is an important open question. However, direct analysis of CSAM filtering strategies is challenging due to data access restrictions.
+
+
+    \emph{Existing work.} LLM \citep{obrien2025deep,maini2025safety} and diffusion studies \cite{nichol2021glide} show that filtering training data can minimize harmful capabilities in the  model, and research in text-to-image generation shows a critical number of training samples are required for concept composition \cite{okawa2023compositional,cretu2025evaluating}.
+
+
+    \emph{Limitations.} AIG-CSAM generation requires strong safety guarantees. While existing work is a starting point to study the effectiveness of data cleaning, the AIG-CSAM problem would benefit from  formal guarantees on a model's ability to generate harmful content. Moreover, because it is illegal for researchers to generate CSAM, it is yet unclear how to exhaustively test models' capabilities to ensure they are safe in these scenarios.
+
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 2: Preventing concept fusion}}
+    {\chipData\ \chipEval\ \chipAdv}
+    {Can generative models be selectively blocked from combining high-risk concepts, such as children and NSFW material?}
+    \end{pboxchipped}
+    \label{sec:develop:concept-fusion}
+
+    A unique concern for CSAM is that harmful content can also be created by \textit{composing} two potentially benign concepts (e.g., benign child depictions and adult content) (see example experiments in $\S$\ref{sec:conceptfusion}). Addressing this via comprehensive data filtering is challenging for similar reasons to CSAM removal. In addition understanding whether partial data cleaning prevents concept fusion, we also need to develop novel architectures and training paradigms to selectively prevent unwanted fusion.
+
+    \emph{Existing work.} Prior work includes retrieval-based architectures for revocable sensitive data access \cite{min2023silo} and
+     classifiers that self-identify concepts to generate each output \cite{wang2024disentangled, espinosa2022concept}.
+
+    \emph{Limitations.} Most concept-based explainability work targets classification and text generation models, not image generation. Mechanisms relying on isolated sensitive datastores face challenges in reliably classifying sensitive imagery (e.g. NSFW content), may make sacrifies in quality on benign concepts, and are further complicated by entangled concepts (e.g. children's medical imagery).
+
+    \vspace{-.1in}
+    \subsubsection{Proof-of-Concept: Concept Fusion}
+    \label{sec:conceptfusion}
+    \vspace{-.05in}
+    A concern we raise in Open Problem 2 is that models may be able to combine high-risk concepts such as children and NSFW material. As shown in Figure 1, we find this to be the case with proxy concepts from CelebA \cite{liu2015deep}: we train diffusion models on separate images of people with blonde hair and eyeglasses, and find that they can generate the combined concept of blondes wearing eyeglasses with \emph{zero} prior examples. Concurrent work from \citet{cretu2025evaluating} similarly uses eyeglasses as a proxy for nudity, and finds that text-to-image models can generate children wearing eyeglasses even with 94\% of child images removed. See App.~\ref{sec:experiment-details} for full experiment details.
+    \vspace{.05in}
+
+    \vspace{-.1in}
+    \begin{pboxchipped}
+    {\textbf{Open Problem 3: Resilience to harmful fine-tuning}}
+    {\chipData\ \chipEval\ \chipAdv}
+    {How can generative models be post-trained to prevent fine-tuning on CSAM or simultaneously fine-tuning on multiple CSAM-related concepts?}
+    \end{pboxchipped}
+    \label{sec:develop:self-destruction}
+
+    Unfortunately, even if base models appear `safe', users can unlock harmful capabilities through post-training procedures such as fine-tuning. Open source models allow users to adapt models on various tasks and are vulnerable to tampering \cite{casper2025open}. CSAM perpetrators use GUI-based LoRA fine-tuning software like ComfyUI \cite{comfy2025} or Ostris \cite{ostris2024aitoolkit} to locally fine-tune open source models on CSAM \cite{Thorn_PAI_CaseStudy_2024}. ``Nudifying'' apps generating illegal deepfake sexual material of children similarly exploit the open source ecosystem, optimizing models for clothing removal and face-swapping \cite{ding2025malicious}. Ideally, text-to-image models would allow benign fine-tuning while preventing these harmful uses.
+
+    \emph{Existing work.} \citet{henderson2023self} propose self-destructing classifiers that degrade when fine-tuned on specific tasks. Similar approaches have been explored for diffusion models \cite{gao2024meta, pan2024leveraging}.
+
+    \emph{Limitations.} Solutions for self-destructing models that obstruct joint fine-tuning on separate concepts (e.g., adult sexual content \textit{and} children) without blocking individual concept fine-tuning are largely unexplored. Similarly, strategies to prevent harmful LoRA fine-tuning (vs. full fine-tuning) are lacking. Methods that build resilience to harmful fine-tuning often require training on obstructed tasks; CSAM data access restrictions make this challenging.
+
+    \textit{We explore further problems in development, such as watermarking and minimizing human exposure, in App.~\ref{app:development}.}
+
+
+    \vspace{-0.5em}
+    \begin{figure}[t!]
+        \centering
+        \includegraphics[width=0.45\linewidth]{figures/blond_eyeglasses_composition.png}
+        \includegraphics[width=0.54\linewidth]{figures/blondhair_eyeglasses_max_over_avg_uncond.png}
+        \caption{Conditional diffusion models trained on images of blondes (top) and people in eyeglasses (middle) can generate blondes wearing eyeglasses (bottom), \textit{without} overlapping training data. Fusion is effective with a critical threshold of training data (right).}
+        \label{fig:composition_samples}
+        \vspace{-.2in}
+    \end{figure}
+
+    \vspace{-.05in}
+    \subsection{Call to Action}
+    \vspace{-.05in}
+    Below we outline take-aways for researchers, AI providers, and policymakers based on the identified open problems.
+    \begin{mybox}
+    {\textbf{Research Directions}}{
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+        \item Assess partial data cleaning limits using proxy datasets; explore architectures preventing unwanted concept fusion for images/video.
+        \item Build self-destructing models targeting the ``nudifying'' ecosystem.
+        \item Create mechanisms to obstruct harmful fine-tuning that do not require access to the harmful material.
+        \item Develop robust content provenance: e.g. models that sharply degrade if finetuned to remove a watermark and localized provenance to handle inpainting.
+    \end{itemize}
+    }
+    \end{mybox}
+
+    Given data access restrictions, researchers and AI providers should establish collaborations with reporting hotlines and LE to enable  effective interventions and evaluation.
+
+
+    \begin{mybox}
+    {\textbf{Concrete Steps for AI Providers}}{
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+    \item Engage CSAM survivors to understand their perspectives on partial data cleaning and re-victimization.
+    \item Partner with hotlines and LE for secure, scoped CSAM access to implement fine-tuning resilience.
+    \item Reliably label model outputs with C2PA or an equivalent standard and indelible watermarks. For open source models, prioritize tamper-proof content provenance solutions.
+    \end{itemize}
+    }
+    \end{mybox}
+
+    Policymakers play a critical role by establishing long-term pathways to encourage safer model designs. Regulatory efforts, research funding, and private-public partnerships that prioritize child safety are all important for effective action.
+
+    \vspace{-.05in}
+    \begin{mybox}[after skip=0pt]
+    {\textbf{Policy Goals}}{
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+    \item Establish avenues for scoped, secure evaluation of AIG-CSAM capabilities by vetted institutions.
+    \item Resource standards organizations (e.g. NIST) to ensure that their guidance for content provenance in the open source setting remains up to date.
+    \item Instruct regulators to engage with the fine-tuning software ecosystem; assess what interventions are in place to prevent the misuse of these tools.
+    \item Task grant-making institutions to prioritize related research efforts in AI child safety.
+    \end{itemize}
+    }
+    \end{mybox}
+
+
+    \section{Deployment Safeguards}
+    \label{sec:deploy}
+    \vspace{-.05in}
+    Once AI models have been trained and evaluated for child safety, they should also be deployed with safeguards  built into the release and distribution processes. Safeguards may include techniques such as content moderation, usage violation detection, reporting mechanisms, and transparency disclosures. These defenses are complicated by the AI model ecosystem, with providers building iteratively off each other's systems via post-training and distillation.
+
+
+    \vspace{-.05in}
+    \subsection {Current Approaches}
+    \vspace{-.05in}
+    Closed-source AI providers currently use \textit{safety classifiers} \cite{inan2023llama} to detect harmful inputs/outputs. They can direct users who attempt to generate illegal content to help resources \cite{thorn2025safetybydesignupdate}. Some open- and closed-source providers establish \textit{user reporting pathways} for violating outputs, prompts, and models. Open-source models may also include safety classifiers \cite{CompVis2022StableDiffusion}, or be \textit{safety fine-tuned} to reject adversarial prompts \cite{kim2024race, gandikota2023erasing}.
+
+    To anticipate adversaries who may attempt to circumvent safeguards, providers employ \textit{red teaming}  to identify harmful prompts for training classifiers \cite{ganguli2022red}. However, this is less common on third-party platforms \cite{thorn2025safetybydesignupdate}. While platforms like HuggingFace generally prohibit third-party models with AIG-CSAM capabilities, enforcement of these policies varies \cite{HarrisWillner_StableDiffusionCSAM_2024}. One measure for developer transparency and accountability is recommending \textit{model cards}.
+
+
+    \vspace{-.1in}
+    \subsection{Open Problems}
+    \vspace{-.05in}
+    Adversaries can jailbreak systems by disguising harmful signals \cite{ma2024jailbreaking, zou2023universal}; text-to-image models are particularly vulnerable \cite{rando2022red,robey2023smoothllm, wei2023jailbreak, jain2023baseline}.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 6: Effective prompt/output detection}}
+    {\chipData\ \chipEval\ \chipAdv \chipWell}
+    {How can harmful prompts/outputs be reliably detected, in an adversarial ecosystem with limited access to in-distribution examples?}
+    \end{pboxchipped}
+
+     \vspace{-.05in}
+     Open source deployments face additional challenges: content moderation is not feasible, safety filters are vulnerable \cite{zhuang2023pilot}, and fine-tuning interventions are easily reversed~\cite{qifine,huunlearning}.
+
+
+    \emph{Existing work.} Existing harmful prompt refusal requires instruction fine-tuning on similar prompts or few-shot examples in context \cite{wei2023jailbreak, markov2023holistic}. Other solutions include automated red teaming tools to search for violatory prompts \citet{li2024art}, zero-shot prompt classifiers \cite{inan2023llama} and guideline based model training to reject unsafe prompts \cite{guan2024deliberative}.
+
+
+    \emph{Limitations.} Red teaming prompts and guidelines may not reflect actual CSAM offender behavior.
+    Most organizations do not have access to CSAM; accurate classifiers require offender data. For those that do, there is no public benchmark to evaluate their solutions. Research to strengthen solutions in the open source setting is broadly lacking.
+
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 7: Automated model assessment}}
+    {\chipEval\ \chipAdv \chipWell}
+    {How can models be assessed for AIG-CSAM capabilities and CSAM training data automatically?}
+    \end{pboxchipped}
+
+
+    Third-party models constitute a significant chunk of the model ecosystem, and are not always assessed for CSAM risks pre-deployment. Scalable assessment of deployed models is needed to enforce platform policies and prevent distribution of models with AIG-CSAM capabilities.
+
+    \emph{Existing work.} Training data extraction techniques \cite{carlini2023extracting} have been applied to detect the presence of specific media in training data. The nascent area of mechanistic interpretability (MI) aims to examine learned weights to understand large models \cite{templeton2024scaling}, with techniques such as automated circuit discovery attempting to identify computational subgraphs that implement specific model behaviors \cite{conmy2023towards}, allowing auditing of specific capabilities by searching relevant subgraphs.
+
+    \emph{Limitations.} Research using MI to audit  CSAM generation capabilities is unexplored; seeking out CSAM trained models to assess such techniques may open  researchers to risk.
+    Current techniques for training data extraction rely on prompting for AIG-CSAM, which violates US law. Text-to-video assessment is also broadly unexplored.
+
+    \textit{We explore further problems in deployment, such as model transparency and standardize assessments, in App.~\ref{app:deployment}.}
+
+
+    \vspace{-.1in}
+    \subsection{Call to Action}
+    As with the previous open problems, in the absence of collaborations that enable researchers access to CSAM or CSAM trained models, there are still lines of research that can be pursued that directly ladder up, e.g.:
+    \begin{mybox}
+    {\textbf{Research Directions}}
+    {
+    \begin{itemize}[itemsep=0ex,leftmargin=*]
+        \item Design image-free auditing to enable upstream detection (e.g. auditing before diffusion denoising completion \cite{yuan2025lurks, li2025detect}.)
+        \item Harden models to white-box attacks using natural-language safety specifications \cite{guan2024deliberative}.
+        \item Develop training data extraction techniques that do not rely on direct prompting or model training
+        \item Explore concept fusion via MI to identify and downweight neurons enabling adult-child combinations.
+    \end{itemize}}
+    \end{mybox}
+
+    \vspace{.05in}
+    AI Providers have unique visibility into how offenders are misusing their platforms. They should prioritize efforts to use and share this data and other related metadata available to strengthen safeguards, covering efforts like:
+
+    \begin{mybox}
+    {\textbf{AI Providers}}{
+    \begin{itemize}[itemsep=0ex,leftmargin=*]
+    \item Join data sharing programs (e.g. \cite{TechCoalitionLantern}) with trusted organizations to broaden access to adversarial prompts across platforms.
+    \item Deploy metadata and other signals to detect policy-violating models. Resource teams to meet the volume of models uploaded/downloaded.
+    \item Partner with external teams pre-deployment for model evaluation, sharing platform-specific offender behavior data for effective assessment
+    \end{itemize}}
+    \end{mybox}
+
+    \vspace{.05in}
+    Policymakers are key to establishing broader systems and structures for building public trust in safety technologies used to safeguard generative models. They also play a critical role in drawing clear lines in the sand that allow for scalable, preventative efforts.
+
+    \begin{mybox}[after skip=0pt]
+    {\textbf{Policymakers}}{
+    \begin{itemize}[itemsep=0ex,leftmargin=*]
+    \item Resource institutions like NIST to establish pathways for public benchmarking of safety tech.
+    \item Pass legislation creating liability for intentional development or distribution of models built to produce AIG-CSAM or “nudify” pictures of children.
+    \item Require that developers disclose whether they conducted CSAM filtering on their training data (e.g. \cite{EU_GPAI_Code_2025}, \cite{eSafetytransparencyreport0825})
+    \end{itemize}
+    }
+    \end{mybox}
+
+
+    \section{Safe Model Maintenance}
+    \label{sec:maintain}
+    Model monitoring and maintenance is necessary to address emerging and evolving threats to children, maintain efficacy against an evolving technology stack, and reflect the broad nature of the ecosystem (where interweaving technology providers and systems may inadvertently reinforce harms, or create new harms \cite{thorn2024evolving}). In particular, open source models are highly vulnerable to abliteration: fine-tuning to remove safety guardrails \cite{henderson2024safety}, allowing offenders to enhance CSAM generation or ``nudify'' minors. Technology aggregators (model hosting platforms, app stores, search engines, AI character platforms, etc.) enable easy discovery of these harmful models \cite{stokelwalker2025chatbots} \cite{Thorn_DeepfakeNudes_2024}.
+
+
+    \subsection {Current Approaches}
+    Current industry safety solutions for detecting harmful models are primarily reactive---removing flagged models rather than evaluating
+    before providing access. While ``nudifying'' applications can be easily discovered via simple text matching searches \cite{gibson2025analyzing}, interventions to delist or suppress such sites and resources are largely lacking.
+    Those that do incorporate detection strategies report using model hashlists (blocking uploads of files that are on hashlists of known CSAM optimized models~\cite{hawkins2025deepfakes,thorn2025safetybydesignupdate}) or similar efforts such as removing advertisements of ``nudifying'' applications \cite{meta2025nudify}.
+    Industry further reports efforts to maintain the quality of their own detection technologies, include child safety policies for each of their services,
+    and collaborate with child safety organizations \cite{thorn2025safetybydesignupdate}.
+
+
+    \subsection{Open Problems}
+    \begin{pboxchipped}
+    {\textbf{Open Problem 11: Identifying abliterated models}}
+    {\chipEval\ \chipAdv}
+    {How can we identify models and services that have been optimized for CSAM and ``nudification''?}
+    \end{pboxchipped}
+
+    With thousands of models, apps, and services created and uploaded daily, rapid identification of those optimized for harmful purposes remains a critical gap.
+
+    \emph{Existing work.} Model fingerprinting uses adversarial attacks to compare outputs between original and suspected stolen models for IP protection \cite{guan2022you}. Model diffing exploits mechanistic differences between base and fine-tuned models to identify model-specific concepts \cite{anthropic2024modeldiff, minder2025robustly}. AIG-CSAM model hashlists can be built using cryptographic hashing.
+
+    \emph{Limitations.} Model fingerprinting requires insight into the ``original'' model, which is challenging to determine for models optimized by malicious actors. Model diffing is not well explored for text-to-image models, particularly for LoRA fine-tuning (often used by CSAM perpetrators). Cryptographic hashing detects exact model replicas but not minor modifications. Further, sourcing such hashlists can require accessing Tor onion sites dedicated to child abuse, which comes with significant legal and wellness risks.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 12: Robust unlearning}}
+    {\chipData\ \chipAdv}
+    {How can we reliably erase the concept of CSAM from generative models?}
+    \end{pboxchipped}
+
+    CSAM might be found in training data after a model is deployed; concept fusion opens up other pathways for CSAM generation.
+    The gold standard is to retrain the model from scratch without harmful data, but retraining can be prohibitively expensive and time-consuming \cite{cooper2024machine}. If the model was built by a different developer than the person who discovered the issue, engaging the original developer to conduct a full re-train may be challenging.
+
+
+    \emph{Limitations.} Existing work has extensively explored \textit{approximate machine unlearning} or \textit{concept erasure} for text-to-image models, to remove knowledge with only a textual description of the harmful concept \cite{gandikota2023erasing, lu2024mace}. However, these methods are vulnerable to adversarial prompts \cite{zhang2024defensive} and only provide probabilistic guarantees that a model no longer retains certain knowledge. CSAM requires \textit{exact unlearning}, providing strict guarantees that CSAM images have no effect on model output \cite{cooper2024machine, bourtoule2021sisa}.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 13: Protecting user imagery}}
+    {\chipEval\ \chipAdv}
+    {How do we proactively protect users’ imagery from unwanted AI-generated manipulation?}
+    \end{pboxchipped}
+
+    Solutions at the model level to prevent adversarial optimization are necessary, but do not afford end users (or platforms hosting user generated content) \textit{agency} to proactively protect their own content from unwanted AI-manipulation.
+
+    \emph{Existing work.} Research exploring image immunization \cite{salman2023raising} involves injecting imperceptible perturbations into the image, such that image editing software fails to successfully edit the image. Some recent efforts specifically focus on protecting children's imagery \cite{afp_monash_silverer_2025}. In the IP protection space, similar solutions have been proposed to disrput a model's ability to mimic the style of particular artists \cite{shan2023glaze}.
+
+    \emph{Limitations.} Some research indicates that these image perturbation strategies are not robust to simple attacks such as image upscaling \cite{honig2024adversarial}. Further, solutions to protect video imagery are lacking. Effectively evaluating these techniques ability to protect children's imagery from ``nudification'' requires attempting to generate such imagery, which has ethical and legal implications.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 14: Securing AI agents}}
+    {\chipData\ \chipAdv\ \chipWell}
+    {How can we prevent the misuse of AI agents and code generation to facilitate child sexual abuse?}
+    \end{pboxchipped}
+
+    Although criminal actors do not yet appear to be adopting automated code generation and AI agents for child sexual exploitation, the tools are already being used in other criminal enterprises, such as malware creation \cite{Anthropic_ThreatIntel_2025} and building hidden webcam recording software \cite{gtig_adversarial_misuse_2025}. AI agents capable of relationship building could enable sexual extortion schemes; code generation could automate the creation of ``nudifying'' software, even if prebuilt nudifying apps are banned.
+
+    \emph{Existing work.} Safety for agentic systems is an emerging field \cite{Song_2024_AgentSafety}. Current work focuses on early detection and prevention of misuse. As with traditional red teaming and filtering, most solutions rely on training models using examples of prior misuse, such as AI-generated malware \cite{deepmind_codemender_2025, OpenAI_IntroducingAardvark_2025, anthropic_claude_code_security_2025}. Such examples are legal to develop and train on, and leading labs actively build this data.
+
+    \emph{Limitations.} Developing ``nudification'' code or sexual extortion prompts is more ethically ambiguous than malware, raising data legality and researcher wellness concerns similar to directly red teaming for CSAM. Robust evidence that these emerging technologies are being misused in child safety contexts may be a prerequisite for industry prioritization, but obtaining the visibility needed to build such evidence remains challenging.
+
+    \textit{We discuss additional open problems in model maintenance, such as safeguard assessments, in App.~\ref{app:maintenance}.}
+
+
+    \subsection{Call to Action}
+
+    Interventions for safe model maintenance are unique in that they can be both cross-platform and model specific, requiring research that covers broad surface areas for harm.
+
+    \begin{mybox}
+    {\textbf{Research Directions}}{
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+        \item Build solutions to detect ``nudifying'' applications.
+        \item Develop model hashing techniques that are robust to minor modifications of the model.
+        \item Explore strategies that provide strong guarantees when remediating/unlearning harmful models.
+        \item Establish image/video protection techniques for chidren's imagery, using proxy data and concepts.
+    \end{itemize}}
+    \end{mybox}
+
+    \vspace{-.05in}
+    AI Providers are already positioned to engage in both model specific and cross-platform safeguarding efforts:
+    \vspace{-.05in}
+
+    \begin{mybox}
+    {\textbf{AI Providers}}{
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+    \item Partner with cross-industry child safety organizations (e.g. the Tech Coalition) to enable cross-platform monitoring and measurement.
+    \item Partner with user-generated content platforms to evaluate strategies for protecting user imagery from unwanted AI-generated manipulation originating from your foundation models
+    \item Model hosting platforms jointly establish cross-industry consistency in policies and enforcement for identifying \& removing harmful third-party models
+    \end{itemize}}
+    \end{mybox}
+
+    \vspace{-.05in}
+    Policymakers can create incentives and pathways such that stakeholders invest in cross-platform safety:
+    \vspace{-.05in}
+
+
+    \begin{mybox}
+    {\textbf{Policymakers}}{
+
+    \begin{itemize}[wide, labelwidth=0pt, labelindent=0pt, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0ex]
+    \item Task regulators to review “nudifying” services (websites, apps, etc.) for unfair, deceptive and fraudulent business practices that promote AIG-CSAM creation and distribution.
+    \item Mandate child safety specific impact and risk assessments for AI systems before deployment.
+    \item Direct regulators to assess platform (e.g. model hosting companies, search engines and app stores) strategies for preventing the distribution of models, apps and services that enable CSEA.
+    \end{itemize}
+    }
+    \end{mybox}
+
+
+    \section{Alternate Views}
+    \label{sec:alternate}
+    \vspace{-.05in}
+
+    The most immediate alternate perspective is  that child safety does not require fundamentally new AI safety approaches, but rather stronger or more consistently applied variants of existing approaches. Indeed, the core technical challenges (e.g., dataset governance, robust content filtering, adversarial testing, and post-deployment monitoring) are not unique to child safety and are broadly relevant to problems like disinformation, non-consensual imagery, and extremist content. Our work argues that despite the seeming similarities to these problems, the legal and ethical restrictions surrounding AIG-CSAM present non-trivial additional hurdles to existing approaches, necessitating in some cases entirely new techniques. While the problems identified are necessary to reduce the harms of AIG-CSAM, we believe many of them could prove beneficial for these other, less regulated domains.
+
+    Another view is that the problem of AIG-CSAM simply cannot be solved, or that we should instead focus AI safety efforts on other, existential risks~\cite{hendrycks2023overview}. Others may go further to suggest that AIG-CSAM is not harmful or is at least preferable to non-AI generated CSAM. Here, we note the significant evidence to the contrary~\cite{ciardha2025ai}, and advocate for a balanced position to invest efforts in multiple safety areas, especially as we could potentially make immediate headway on reducing the harms of AIG-CSAM during a time when reports are increasing sharply~\cite{2025report,iwfblog,iwf2024}.
+
+    Finally, one may question whether technical AI safety interventions should be the primary locus of response at all. We could instead emphasize social, legal, and preventive measures such as digital literacy education for children and parents, victim support services, updated criminal law and international cooperation, and platform liability regimes that deter harmful deployment. From this standpoint, overemphasis on building new AI-specific safeguards may create a false sense of technological solvability while underinvesting in root causes. Others may go further to argue that policy solutions would eliminate the need for developing new technical approaches altogether, reducing the legal barriers to applying existing safety approaches.
+    Our position reflects that policy solutions must come paired with, and be informed by, technical advancements.
+
+
+    \section{Conclusion, Limitations \& Future Work}
+    \label{sec:conclusion}
+    In this work we argue that current safety techniques assume data accessibility, transparency, and evaluation practices that are in many cases incompatible with ethical and legal constraints surrounding CSAM. We then propose targeted recommendations and a set of \textit{15 open technical problems} that can improve child safety in the AI ecosystem.
+
+    We note limitations and areas for future work in our study.
+    We focus on \textit{AI-generated imagery}. However, exploitation spans multiple modalities,
+    including text sexualizing minors \cite{graphika25},
+    generative chatbots using celebrity voices for sexual conversations with children's accounts \cite{horwitz2025}, and video deepfakes of child sexual abuse \cite{kamachee2025video}.
+    While some of the issues identified in this work may also translate to other modalities,
+    we leave the identification of technical open problems in non-image modalities as future work.
+
+    We also note that the risks and open problems identified throughout are primarily from a \textit{U.S.-centric perspective}. The policy institutions, regulatory bodies, and frameworks referenced are also primarily U.S.-centric. Global regulation in this space is actively evolving \cite{politico_uk_nudification_ban_2025, bbc_nudify_fine_2025}, and those evolutions may add additional nuance and context to the content in this work.
+
+
+    \clearpage
+
+
+    \bibliographystyle{icml2026}
+    \bibliography{refs}
+
+    \newpage
+    \appendix
+
+    \section{Glossary}
+    \label{app:glossary}
+
+    \begin{table}[h!]
+      \centering
+      \begin{tabular}{>{\raggedleft}p{0.24\columnwidth} p{0.65\columnwidth}}
+        \toprule
+                \textbf{CSEA} & Child sexual abuse and exploitation \\
+                \textbf{AIG-CSAM }& AI-generated child sexual abuse material \\
+                \textbf{Reporting hotlines} & National Center for Missing \& Exploited Children (NCMEC), Internet Watch Foundation (IWF) \\
+                \textbf{AI Developer} & The entity responsible for designing, training, and testing an AI model or system. \\
+                \textbf{AI Deployer} & The entity that puts an AI system into service and controls its operation, often by integrating it into a product or platform. \\
+                \textbf{AI Provider} & Any entity that makes an AI system or model available for use. \\
+        \bottomrule
+     \end{tabular}
+     \caption{Key definitions used throughout this paper.}
+     \label{tab:terms}
+    \end{table}
+
+    \begin{table*}[th!]
+        \centering
+        \begin{tabular}{r  ccccccccccccccc}
+            \toprule
+            Open Problem \# & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} \\
+            \midrule
+            Data restrictions & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \xmark & \xmark & \cmark & \cmark & \xmark & \cmark & \xmark & \cmark & \xmark \\
+            Evaluation restrictions & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark & \cmark & \xmark & \cmark & \xmark & \cmark \\
+            Adversarial environment & \xmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+            Wellness implications & \xmark & \xmark & \xmark & \cmark & \xmark & \cmark & \cmark & \cmark & \xmark & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark \\
+             \bottomrule
+        \end{tabular}
+        \caption{Key challenges and broad restrictions across the proposed open problems in preventing CSAM generation.}
+        \label{tab:my_label}
+    \end{table*}
+
+    \section{Additional Related Work}
+    \label{sec:relatedwork}
+
+    Extending AI safety to AIG-CSAM prevention naturally builds on diverse prior work that mitigates AI risks. Throughout this work, we highlight many relevant papers in these domains, e.g., on topics such as on red teaming \cite{ganguli2022red}, model fingerprinting~\cite{guan2022you}, and tamper resistance \cite{henderson2023self}. In addition, several papers (1) outline broader open problems in AI safety, or (2) propose child-safety specific mitigations. We highlight these areas of related work here.
+
+    \paragraph{Open Problems in AI Safety.} \citet{casper2025open} outline open problems in derisking open-source models, several of which directly address child safety, such as reliable tamper resistance (Open Problem 3: Resilience to harmful fine-tuning). Similarly, \citet{kamachee2025video} demonstrate problems with the open-source model landscape that enable video deepfake propagation, including video CSAM. Specific to Open Problem 1 (Partial data cleaning), \citet{cretu2025evaluating} find that partial data filtering is insufficient for CSAM prevention and deconstruct open subproblems, such as accurate child detection.
+
+    \paragraph{Child Safety Mitigations.} Some existing works specifically address open problems outlined in this paper for preventing AIG-CSAM. For example, \citet{thiel2023identifying} propose annotation pipelines to improve data cleaning (Open Problem 1) and apply them to Stable Diffusion. Work from \citet{gutfeter2023detecting} develops an end-to-end CSAM classifier and proposes an evaluation methodology incorporating proxy data and controlled access to CSAM (Open Problem 6). There remains a significant need for further work on these problems.
+
+     \section{Additional Open Problems}
+     \label{app:additional_openproblems}
+
+
+    \subsection{Developing Safe Models by Design}
+    \label{app:development}
+     \begin{pboxchipped}
+    {\textbf{Open Problem 4: Minimizing human exposure}}
+    {\chipAdv\ \chipWell}
+    {How does exposure to AIG-CSAM affect red teamers? How can human exposure be minimized?}
+    \end{pboxchipped}
+    \label{sec:develop:rt-human-exposure}
+
+    The emotional and mental toll of CSAM exposure is well documented across moderation \cite{spence2023psychological}, law enforcement work \cite{rimer2025once}, and data labeling \cite{guardian2023aitoll}, with additional wellness implications for red teamers \cite{zhang2024human}. These harms demonstrate the clear need for red teaming solutions that minimize human exposure to CSAM.
+
+    \textit{Existing work.} Several frameworks for automated red teaming text-to-image models have been proposed \cite{chin2023prompting4debugging, li2024art, li2025dream}, and existing industry content review tools incorporate wellness features like image blurring \cite{das2020fast}.
+
+    \textit{Limitations.} Text-to-image models are particularly vulnerable to out-of-distribution prompts, requiring robust human red teaming \cite{daras2022discovering, rando2022red}. Offenders quickly discover new jailbreaking mechanisms, making it challenging to ensure testing remains relevant. Moreover, evaluating wellness features for red-teamers requires sociotechnical studies with industry and red teaming service providers, who may not have incentive to participate in such studies.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 5: Watermark robustness}}
+    {\chipData\ \chipEval\ \chipAdv}
+    {How can text-to-image watermarks be made robust to removal, spoofing, and partial edits?}
+    \end{pboxchipped}
+    \label{sec:develop:watermarks}
+
+    In the CSAM space, offenders actively combat safety interventions, including stripping metadata and other identifying factors in the image (e.g. watermarks).
+    Researchers have explored robust watermarking techniques that are less susceptible to spoofing or removal \cite{wan2022comprehensive, gowal2025synthid}. Methods like Stable Signature incorporate the watermark directly in the model weights during pretraining \citet{fernandez2023stable}.
+
+
+    \emph{Limitations.} Many schemes remain vulnerable to simple attacks \cite{pang2024no}. Watermarks can be removed by partially modifying an image \cite{tallam2025removing} or
+    editing code in image generation scripts \cite{rombach2022high}. Watermarking techniques that are more robust to fine-tuning and erasure tend to be more vulnerable to being stolen and spoofed on other images \cite{pang2024no}. Robust solutions that include a history of partial edits are also lacking.
+
+    \subsubsection{Experiment Details: Concept Fusion}
+    \label{sec:experiment-details}
+
+    To demonstrate concept fusion, we trained conditional flow matching models
+    on 128x128 CelebA images. Each model comprised a 295M parameter UNet and was trained for 700 epochs. Given two attribute classes $A, B$ (e.g., blonde hair, eyeglasses), models were trained on images from $A \setminus B \cup B \setminus A$---for instance, blondes \textit{without} eyeglasses and non-blondes \textit{with} eyeglasses (see Section~\ref{sec:conceptfusion} for examples). We train on 4K images of a certain hair color (blonde, black) without eyeglasses and a varying number of images (64-4K) without that hair color but with eyeglasses.
+
+    We measured the models' propensity to generate \textit{compositional} images from $A \cap B$ (blonde hair and eyeglasses in Figure~\ref{fig:composition_samples}, black hair and eyeglasses in Figure~\ref{fig:composition_samples_2}) while varying dataset composition. In Figure~\ref{fig:composition_samples}, we test two generation methods of (1) unconditional generation or (2) conditioning on an average class vector. We then take the maximum detection rate over these two methods. We observe a sharp threshold in the number of samples required for composition: with 750 eyeglasses samples, composition likelihood was ${\sim}0.1\%$; with 1000 samples, this increased $15\times$ to $1.5\%$.
+
+    Varying the sampling strategy can further increase this ratio. In Figure~\ref{fig:composition_samples_2}, we evaluate a sequential conditioning approach: instead of denoising unconditionally for $T$ steps, we first denoise for $n < T$ steps conditioned on class $A$, then for $T - n$ steps conditioned on class $B$. While a fixed conditioning (unconditional or average) measures propensity, this strategy measures capability. Here, capability proves substantially stronger---the model generates images from $A \cap B$ over $25\%$ of the time with just 250 eyeglasses samples ($6.2\%$ of training data).
+
+    \begin{figure}[!ht]
+        \centering
+        \includegraphics[width=\linewidth]{conditional_generation.png}
+        \caption{We test composition of the black hair and eyeglasses concepts, varying the number of eyeglasses samples from 64 to 4K. When increasing from 64 to 250 samples, capability to produce compositional images triples from 9\% to 27\%.}
+        \label{fig:composition_samples_2}
+    \end{figure}
+
+    Our findings align with \citet{okawa2023compositional}, who also observe a sharp sample threshold for concept composition. This suggests partial data cleaning may be effective, though the bar is high: in our setting, just 64 images of a ``cleaned concept'' still enable composition ${\sim}10\%$ of the time. Future work should explore how this threshold scales with larger diffusion models. Concurrent work from \citet{cretu2025evaluating} more directly evaluates model capability to compose children with other concepts and highlights additional challenges such as child detection. We note both directions as ways to pursue child-safety research on the open problems posed here, at different levels of abstraction.
+
+    \subsection{Deployment Safeguards}
+    \label{app:deployment}
+    \begin{pboxchipped}
+    {\textbf{Open Problem 8: Standardized safety assessments}}
+    {\chipEval\ \chipAdv\ \chipWell}
+    {How can we standardize assessments for AIG-CSAM capabilities?}
+    \end{pboxchipped}
+
+    Standardized safety assessments allow for consistent and transparent model evaluation. For child safety in particular, building confidence and trust in evaluations requires assurance that the assessment is robust, and not unduly influenced by other incentives, e.g., product deadlines.
+
+    \emph{Existing work.} External red teaming and benchmarking are standard for assessing generative models. External domain expertise can help discover novel issues \cite{ahmad2025openai}. Benchmarking supports scalable reproducibility, allowing multiple models from different developers to undergo the same evaluation \cite{vidgen2024introducing}.
+
+    \emph{Limitations.} Safety benchmarking assessments may correlate with model capabilities rather than actual safety \cite{ren2024safetywashing}. Other studies highlight fundamental gaps in AI safety assessments, particularly for non-text modalities \cite{rauh2024gaps}. Given the adversarial nature of CSAM offenders and the wellness and legal barriers, static benchmarks quickly becomes outdated as offenders develop new strategies for generating AIG-CSAM.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 9: Model transparency}}
+    {\chipData\ \chipAdv}
+    {How can we use model cards to encourage transparency without inadvertently enabling offenders?}
+    \end{pboxchipped}
+
+    Model cards are the industry standard for disclosing information about models. For AIG-CSAM, documenting child safety interventions creates a natural pause point for developers to assess safeguards.
+
+    \emph{Existing work.} Model cards are intended to provide fair assessment on a variety of human critical factors, e.g., bias \cite{mitchell2019model}.
+    Model card format can influence how interpretable the information is to non-technical audiences \cite{crisan2022interactive}, enabling ethical decision-making for laypersons as well.  Even the act of filling out model cards can elicit further ethical consideration from participating developers \cite{nunes2022using}.
+
+    \emph{Limitations.} Disclosing safety interventions is only effective if deployment is actually contingent on implementing them; currently, models without CSAM safeguards can still be released. While transparency enables good-faith actors to identify well-safeguarded models, it also enables offenders to discover vulnerable ones.
+
+
+    \subsubsection{Proof-of-Concept: Model Cards}
+
+    As a second proof-of-concept experiment, we manually audit public model and system cards for 14 widely used image and video generators (Table~\ref{tab:model-card-coverage}), asking whether they document child-safety relevant risks. These 14 models were chosen based on their presence in popular video generation \cite{hf_video_generation_leaderboard} and image generation leader boards \cite{hf_text_to_image_leaderboard}. This analysis is limited to publicly available documentation and does not make assessments about any deployed safeguards, absence of documentation should not be interpreted as absence of safety measures. We mark whether a public card exists and whether it reports any evaluation targeted at children, explicit sexual content in general, and CSAM.
+
+    \begin{table}[!ht]
+        \centering
+        \begin{tabularx}{\linewidth}{lccccc}
+            \toprule
+            Model & \shortstack{Card\\Exists} & Child & Explicit & CSAM \\
+            \midrule
+            Sora         & \cmark & \cmark & \cmark & \cmark \\
+            Sora 2       & \cmark & \cmark & \cmark & \cmark \\
+            DALLE-3      & \cmark & \xmark & \cmark & \xmark \\
+            Imagen 4     & \cmark & \xmark & \xmark & \xmark \\
+            Veo 3.1      & \cmark & \xmark & \xmark & \xmark \\
+            FLUX.1         & \cmark & \xmark & \xmark & \xmark
+            \\
+            DeepSeek Janus & \cmark & \xmark & \xmark & \xmark
+            \\
+            SDXL         & \cmark & \xmark & \xmark & \xmark
+            \\
+            Z-Image & \cmark & \xmark & \xmark & \xmark
+            \\
+            RunwayML Gen 4.5 & \xmark & -- & -- & -- \\
+            Grok Imagine & \xmark & -- & -- & -- \\
+            Midjourney   & \xmark & -- & -- & -- \\
+            Pika         & \xmark & -- & -- & -- \\
+            Luma         & \xmark & -- & -- & -- \\
+            \bottomrule
+        \end{tabularx}
+        \caption{Presence of child safety related disclosures in public documents for selected image and video generation models. This analysis examines disclosures regarding the categories of children, explicit content, and CSAM and is limited to publicly available documentation; the absence of documentation does not necessarily imply the absence of safeguards.}
+        \vspace{-2em}
+            \label{tab:model-card-coverage}
+    \end{table}
+
+
+    Among the systems with model or system cards, \textit{only} OpenAI’s Sora models include dedicated sections that explicitly discuss child safety and CSAM. Several of the most widely deployed systems (e.g., Midjourney, Grok Imagine, Pika, Luma) have no public model card at all, despite their scale and popularity.
+
+    \begin{pboxchipped}
+    {\textbf{Open Problem 10: Hobbyist ecosystem}}
+    {\chipData\ \chipAdv\ \chipWell}
+    {How can we encourage adoption of safety best practices across the diverse ML hobbyist ecosystem?}
+    \end{pboxchipped}
+
+
+    AI safety efforts typically target industry providers rather than hobbyists who build on foundation models \cite{Thorn_PAI_CaseStudy_2024}. This leaves a gap: downstream actors may lack the resources, incentives, or oversight to maintain the CSAM safeguards built into the original model.
+
+    \emph{Existing work.} AI developers broadly recognize ethical dilemmas but often lack resources and training to navigate them \cite{griffin2025ethical}. Education-based prevention of child sexual abuse is well-studied and established as a standard approach \cite{wurtele2010partnering, patterson2022systematic}. Research on hobbyist developers highlights intellectual stimulation as a primary motivation \cite{koch2014joining}.
+
+    \emph{Limitations.} Education efforts to promote developer awareness and CSAM prevention practices remain understudied. Researching those online communities carries risks of harassment and doxing \cite{doerfler2021m}, compounded by the high-stakes nature of child sexual abuse—a topic that often prompts defensiveness and avoidance when developers confront unintended consequences of their models.
+
+
+    \subsection{Safe Model Maintenance}
+    \label{app:maintenance}
+    \begin{pboxchipped}
+    {\textbf{Open Problem 15: Assessing safeguards}}
+    {\chipEval\ \chipAdv \chipWell}
+    {How do third-party auditors and users effectively assess the efficacy of implemented safeguards?}
+    \end{pboxchipped}
+
+    Even where safeguards have been implemented or reported as implemented, assessing their effectiveness---individually and within the broader system context---is necessary for building trust and transparency.
+
+    \emph{Limitations.} As noted earlier, most AI safety assessments focus on individual models through red teaming or benchmarks. Mechanisms for assessing complex AI systems are lacking. Sociotechnical assessments that account for how users actually engage with platforms, including offender behavior, platform-specific risks, and cross-platform dynamics, remain uncommon.
+
+    Companies may lack incentive to provide access necessary for these studies, which are important for building shared understanding and trust. Some metrics require cross-platform measurement, such as tracing circulating AIG-CSAM from downstream tools back to source models as a proxy for safeguard robustness.

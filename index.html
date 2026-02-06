@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Problems in AI Child Safety</title>
+  <meta name="description" content="15 open research problems in AI child safety, spanning model development, deployment, and maintenance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body class="bg-white text-slate-800 antialiased" style="font-family: 'Inter', system-ui, sans-serif;">
+
+  <!-- ────────── Navigation ────────── -->
+  <nav id="navbar" class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#" class="font-bold text-slate-900 text-lg tracking-tight">AI Child Safety</a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#overview" class="nav-link text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Overview</a>
+          <a href="#problems" class="nav-link text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Open Problems</a>
+          <a href="#action" class="nav-link text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Calls to Action</a>
+          <a href="#cite" class="nav-link text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Cite</a>
+          <a href="#" id="paper-link" class="text-sm font-medium bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors">Read Paper</a>
+        </div>
+        <button id="menu-toggle" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white">
+      <div class="px-4 py-3 space-y-1">
+        <a href="#overview" class="block px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Overview</a>
+        <a href="#problems" class="block px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Open Problems</a>
+        <a href="#action" class="block px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Calls to Action</a>
+        <a href="#cite" class="block px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cite</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ────────── Hero ────────── -->
+  <section class="relative bg-slate-900 text-white pt-32 pb-24 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950"></div>
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-indigo-300 font-semibold text-sm tracking-widest uppercase mb-6">Research Paper</p>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1]">
+        Open Problems in<br />AI Child Safety
+      </h1>
+      <p class="mt-5 text-base sm:text-lg text-slate-400 tracking-wide">
+        N.&nbsp;Kale<span class="text-indigo-400">*</span>,
+        R.&nbsp;Portnoff<span class="text-indigo-400">*</span>,
+        P.&nbsp;Thaker,
+        M.&nbsp;Simpson,
+        R.&nbsp;Wang,
+        K.&nbsp;Kuo,
+        C.&nbsp;Yadav,
+        V.&nbsp;Smith
+      </p>
+      <p class="mt-2 text-sm text-slate-500">Thorn &middot; Carnegie Mellon University</p>
+      <p class="mt-8 text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        Modern AI systems present profound new risks to child safety. We outline
+        <strong class="text-white">15 open problems</strong> spanning the AI development lifecycle &mdash;
+        from dataset curation and model design to deployment and long-term maintenance &mdash;
+        where advances could have immediate impact on protecting children.
+      </p>
+      <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#problems" class="inline-flex items-center justify-center bg-white text-slate-900 px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-slate-100 transition-colors shadow-lg shadow-black/20">
+          Explore the Problems
+        </a>
+        <a href="#" class="inline-flex items-center justify-center border border-white/20 bg-white/5 backdrop-blur px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-white/15 transition-colors">
+          Read the Paper
+          <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── Overview ────────── -->
+  <section id="overview" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Main Position -->
+      <div class="max-w-4xl mx-auto mb-20">
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-8 sm:p-10">
+          <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-4">Main Position</p>
+          <p class="text-lg sm:text-xl text-slate-800 leading-relaxed">
+            Existing AI safety research makes assumptions that do not match the legal and ethical constraints of safety applications preventing child sexual abuse and exploitation. Bridging this gap by solving open sociotechnical problems will be critical to make AI safety solutions effective for child safety in practice.
+          </p>
+        </div>
+      </div>
+
+      <!-- Key Challenges -->
+      <h2 class="text-3xl font-bold text-center text-slate-900 mb-3">Key Challenges</h2>
+      <p class="text-center text-slate-500 max-w-2xl mx-auto mb-12">
+        The illegal and sensitive nature of CSAM creates unique challenges for AI safety that distinguish it from other content safety problems.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Data -->
+        <div class="rounded-xl border border-blue-100 bg-blue-50/50 p-6">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Data Restrictions</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">CSAM is illegal in most countries, with strict privacy safeguards for children&rsquo;s data that limit standard AI safety approaches.</p>
+        </div>
+        <!-- Eval -->
+        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-6">
+          <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Evaluation Restrictions</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">Intentionally generating AIG-CSAM is illegal, and standardized evaluation datasets do not exist due to data access restrictions.</p>
+        </div>
+        <!-- Adversarial -->
+        <div class="rounded-xl border border-red-100 bg-red-50/50 p-6">
+          <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Adversarial Environment</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">CSAE offenders actively circumvent safeguards, while AI developers typically only disclose high-level safety descriptions.</p>
+        </div>
+        <!-- Wellness -->
+        <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-6">
+          <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Wellness Implications</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">CSAM exposure poses substantial psychological risks including trauma and PTSD, making safety techniques requiring human involvement challenging.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── Open Problems ────────── -->
+  <section id="problems" class="py-20 bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-slate-900 mb-3 text-center">Open Problems</h2>
+      <p class="text-center text-slate-500 max-w-2xl mx-auto mb-12">
+        15 research problems across three phases of the AI lifecycle. Filter by challenge type to explore.
+      </p>
+
+      <!-- Filter bar -->
+      <div class="flex flex-wrap gap-2 justify-center mb-14">
+        <button data-filter="all" class="filter-btn active-filter">All Problems</button>
+        <button data-filter="data" class="filter-btn">
+          <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>Data
+        </button>
+        <button data-filter="eval" class="filter-btn">
+          <span class="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>Evaluation
+        </button>
+        <button data-filter="adv" class="filter-btn">
+          <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>Adversarial
+        </button>
+        <button data-filter="well" class="filter-btn">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>Wellness
+        </button>
+      </div>
+
+      <!-- ── Phase 1: Development ── -->
+      <div class="phase-section mb-16">
+        <div class="border-l-4 border-indigo-400 pl-4 mb-8">
+          <h3 class="text-xl font-bold text-slate-900">Developing Safe Models by Design</h3>
+          <p class="text-sm text-slate-500 mt-1">Problems 1&ndash;5 &middot; Pre-training and training phase</p>
+        </div>
+
+        <div class="grid gap-6">
+          <!-- OP1 -->
+          <article class="problem-card" data-tags="data eval">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">1</span>
+                <h4 class="text-lg font-bold text-slate-900">Partial data cleaning</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-eval">Evaluation</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How does data cleaning affect a generative model&rsquo;s ability to depict a concept? To what degree can partial cleaning guarantee that a model cannot depict CSAM?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Guaranteeing complete CSAM removal is difficult due to imperfect detection technology, scale of data, and moderator wellness concerns. Determining whether imperfect removal can prevent text-to-image models from learning to generate CSAM is an important open question.
+            </p>
+            <details class="mt-4 group">
+              <summary class="cursor-pointer text-indigo-600 font-medium text-sm flex items-center gap-1.5 hover:text-indigo-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>LLM and diffusion studies show that filtering training data can minimize harmful capabilities, and research in text-to-image generation shows a critical number of training samples are required for concept composition.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>AIG-CSAM generation requires strong safety guarantees. While existing work is a starting point, the problem would benefit from formal guarantees on a model&rsquo;s ability to generate harmful content. Because it is illegal for researchers to generate CSAM, it is unclear how to exhaustively test models&rsquo; capabilities.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP2 -->
+          <article class="problem-card" data-tags="data eval adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">2</span>
+                <h4 class="text-lg font-bold text-slate-900">Preventing concept fusion</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              Can generative models be selectively blocked from combining high-risk concepts, such as children and NSFW material?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Harmful content can be created by composing two potentially benign concepts. Novel architectures and training paradigms are needed to selectively prevent unwanted fusion.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-indigo-600 font-medium text-sm flex items-center gap-1.5 hover:text-indigo-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Prior work includes retrieval-based architectures for revocable sensitive data access and classifiers that self-identify concepts to generate each output.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Most concept-based explainability work targets classification and text generation, not image generation. Mechanisms relying on isolated sensitive datastores face challenges in reliably classifying sensitive imagery and may sacrifice quality on benign concepts.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP3 -->
+          <article class="problem-card" data-tags="data eval adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">3</span>
+                <h4 class="text-lg font-bold text-slate-900">Resilience to harmful fine-tuning</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can generative models be post-trained to prevent fine-tuning on CSAM or simultaneously fine-tuning on multiple CSAM-related concepts?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Even if base models appear safe, users can unlock harmful capabilities through post-training. CSAM perpetrators use GUI-based LoRA fine-tuning software to locally fine-tune open source models on CSAM.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-indigo-600 font-medium text-sm flex items-center gap-1.5 hover:text-indigo-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Self-destructing classifiers that degrade when fine-tuned on specific tasks have been proposed, with similar approaches explored for diffusion models.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Solutions for self-destructing models that obstruct joint fine-tuning on separate concepts are largely unexplored. Strategies to prevent harmful LoRA fine-tuning are lacking. Methods that build resilience to harmful fine-tuning often require training on obstructed tasks, which CSAM data access restrictions make challenging.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP4 -->
+          <article class="problem-card" data-tags="adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">4</span>
+                <h4 class="text-lg font-bold text-slate-900">Minimizing human exposure</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How does exposure to AIG-CSAM affect red teamers? How can human exposure be minimized?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              The emotional and mental toll of CSAM exposure is well documented across content moderation, law enforcement, and data labeling, with additional wellness implications for red teamers.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-indigo-600 font-medium text-sm flex items-center gap-1.5 hover:text-indigo-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Frameworks for automated red teaming text-to-image models have been proposed, and industry content review tools incorporate wellness features like image blurring.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Text-to-image models are particularly vulnerable to out-of-distribution prompts, requiring robust human red teaming. Offenders quickly discover new jailbreaking mechanisms. Evaluating wellness features requires sociotechnical studies with industry and red teaming providers.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP5 -->
+          <article class="problem-card" data-tags="data eval adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">5</span>
+                <h4 class="text-lg font-bold text-slate-900">Watermark robustness</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can text-to-image watermarks be made robust to removal, spoofing, and partial edits?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Offenders actively combat safety interventions, including stripping metadata and watermarks from generated images.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-indigo-600 font-medium text-sm flex items-center gap-1.5 hover:text-indigo-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Robust watermarking techniques have been explored. Methods like Stable Signature incorporate the watermark directly in model weights during pretraining.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Many schemes remain vulnerable to simple attacks. Watermarks can be removed by partially modifying an image or editing code in generation scripts. Techniques that are more robust to fine-tuning and erasure tend to be more vulnerable to being stolen and spoofed. Solutions that include a history of partial edits are also lacking.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+        </div>
+      </div>
+
+      <!-- ── Phase 2: Deployment ── -->
+      <div class="phase-section mb-16">
+        <div class="border-l-4 border-sky-400 pl-4 mb-8">
+          <h3 class="text-xl font-bold text-slate-900">Deployment Safeguards</h3>
+          <p class="text-sm text-slate-500 mt-1">Problems 6&ndash;10 &middot; Release and distribution phase</p>
+        </div>
+
+        <div class="grid gap-6">
+          <!-- OP6 -->
+          <article class="problem-card" data-tags="data eval adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">6</span>
+                <h4 class="text-lg font-bold text-slate-900">Effective prompt/output detection</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can harmful prompts/outputs be reliably detected, in an adversarial ecosystem with limited access to in-distribution examples?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Adversaries jailbreak systems by disguising harmful signals; text-to-image models are particularly vulnerable. Open source deployments face additional challenges as content moderation is not feasible and safety filters are vulnerable.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sky-600 font-medium text-sm flex items-center gap-1.5 hover:text-sky-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Existing solutions include instruction fine-tuning on similar prompts, automated red teaming tools, zero-shot prompt classifiers, and guideline-based model training to reject unsafe prompts.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Red teaming prompts and guidelines may not reflect actual CSAM offender behavior. Most organizations lack CSAM access; accurate classifiers require offender data. No public benchmark exists to evaluate solutions. Research to strengthen solutions in the open source setting is broadly lacking.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP7 -->
+          <article class="problem-card" data-tags="eval adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">7</span>
+                <h4 class="text-lg font-bold text-slate-900">Automated model assessment</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can models be assessed for AIG-CSAM capabilities and CSAM training data automatically?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Third-party models are not always assessed for CSAM risks pre-deployment. Scalable assessment is needed to enforce platform policies and prevent distribution of models with AIG-CSAM capabilities.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sky-600 font-medium text-sm flex items-center gap-1.5 hover:text-sky-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Training data extraction techniques have been applied to detect specific media in training data. Mechanistic interpretability aims to examine learned weights, with automated circuit discovery identifying computational subgraphs for specific behaviors.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Using mechanistic interpretability to audit CSAM generation capabilities is unexplored. Current training data extraction techniques rely on prompting for AIG-CSAM, which violates US law. Text-to-video assessment is broadly unexplored.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP8 -->
+          <article class="problem-card" data-tags="eval adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">8</span>
+                <h4 class="text-lg font-bold text-slate-900">Standardized safety assessments</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we standardize assessments for AIG-CSAM capabilities?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Standardized safety assessments allow for consistent and transparent model evaluation. Building confidence and trust in evaluations requires assurance that assessment is robust and not unduly influenced by external incentives.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sky-600 font-medium text-sm flex items-center gap-1.5 hover:text-sky-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>External red teaming and benchmarking are standard for assessing generative models. External domain expertise can help discover novel issues, and benchmarking supports scalable reproducibility.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Safety benchmarking may correlate with model capabilities rather than actual safety. Fundamental gaps exist in AI safety assessments for non-text modalities. Static benchmarks quickly become outdated as offenders develop new strategies.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP9 -->
+          <article class="problem-card" data-tags="data adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">9</span>
+                <h4 class="text-lg font-bold text-slate-900">Model transparency</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we use model cards to encourage transparency without inadvertently enabling offenders?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Model cards documenting child safety interventions create a natural pause point for developers to assess safeguards, but transparency can be a double-edged sword.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sky-600 font-medium text-sm flex items-center gap-1.5 hover:text-sky-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Model cards provide fair assessment on bias and other factors. Card format can influence interpretability for non-technical audiences. The process of filling out model cards can elicit further ethical consideration from developers.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Disclosing safety interventions is only effective if deployment is contingent on implementing them; currently, models without CSAM safeguards can still be released. Transparency enables offenders to discover vulnerable models.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP10 -->
+          <article class="problem-card" data-tags="data adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">10</span>
+                <h4 class="text-lg font-bold text-slate-900">Hobbyist ecosystem</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we encourage adoption of safety best practices across the diverse ML hobbyist ecosystem?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              AI safety efforts typically target industry providers rather than hobbyists who build on foundation models. This leaves a gap: downstream actors may lack the resources, incentives, or oversight to maintain CSAM safeguards.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sky-600 font-medium text-sm flex items-center gap-1.5 hover:text-sky-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>AI developers broadly recognize ethical dilemmas but often lack resources and training. Education-based prevention of child sexual abuse is well-studied. Research on hobbyist developers highlights intellectual stimulation as a primary motivation.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Education efforts to promote developer awareness and CSAM prevention practices remain understudied. Researching online communities carries risks of harassment and doxing, compounded by the high-stakes nature of child sexual abuse.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+        </div>
+      </div>
+
+      <!-- ── Phase 3: Maintenance ── -->
+      <div class="phase-section">
+        <div class="border-l-4 border-teal-400 pl-4 mb-8">
+          <h3 class="text-xl font-bold text-slate-900">Safe Model Maintenance</h3>
+          <p class="text-sm text-slate-500 mt-1">Problems 11&ndash;15 &middot; Post-deployment monitoring and response</p>
+        </div>
+
+        <div class="grid gap-6">
+          <!-- OP11 -->
+          <article class="problem-card" data-tags="eval adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">11</span>
+                <h4 class="text-lg font-bold text-slate-900">Identifying abliterated models</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we identify models and services that have been optimized for CSAM and &ldquo;nudification&rdquo;?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              With thousands of models, apps, and services created and uploaded daily, rapid identification of those optimized for harmful purposes remains a critical gap.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-teal-600 font-medium text-sm flex items-center gap-1.5 hover:text-teal-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Model fingerprinting uses adversarial attacks to compare outputs for IP protection. Model diffing exploits mechanistic differences to identify model-specific concepts. AIG-CSAM model hashlists can be built using cryptographic hashing.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Model fingerprinting requires insight into the &ldquo;original&rdquo; model. Model diffing is not well explored for text-to-image models or LoRA fine-tuning. Cryptographic hashing detects exact replicas but not minor modifications.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP12 -->
+          <article class="problem-card" data-tags="data adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">12</span>
+                <h4 class="text-lg font-bold text-slate-900">Robust unlearning</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we reliably erase the concept of CSAM from generative models?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              CSAM might be found in training data after deployment; concept fusion opens additional pathways. The gold standard is retraining from scratch, but this is prohibitively expensive and time-consuming.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-teal-600 font-medium text-sm flex items-center gap-1.5 hover:text-teal-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Approximate machine unlearning and concept erasure for text-to-image models have been explored, removing knowledge with only a textual description of the harmful concept.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>These methods are vulnerable to adversarial prompts and only provide probabilistic guarantees. CSAM requires exact unlearning, providing strict guarantees that CSAM images have no effect on model output.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP13 -->
+          <article class="problem-card" data-tags="eval adv">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">13</span>
+                <h4 class="text-lg font-bold text-slate-900">Protecting user imagery</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How do we proactively protect users&rsquo; imagery from unwanted AI-generated manipulation?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Model-level solutions are necessary but don&rsquo;t afford end users or platforms hosting user-generated content agency to proactively protect their own content.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-teal-600 font-medium text-sm flex items-center gap-1.5 hover:text-teal-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Image immunization involves injecting imperceptible perturbations so that editing software fails. Some recent efforts specifically focus on protecting children&rsquo;s imagery. In IP protection, similar solutions disrupt style mimicry.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Research indicates these perturbation strategies are not robust to simple attacks such as image upscaling. Video protection solutions are lacking. Evaluating these techniques for children&rsquo;s imagery has ethical and legal implications.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP14 -->
+          <article class="problem-card" data-tags="data adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">14</span>
+                <h4 class="text-lg font-bold text-slate-900">Securing AI agents</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-data">Data</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How can we prevent the misuse of AI agents and code generation to facilitate child sexual abuse?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              While criminal actors haven&rsquo;t yet adopted AI agents for child sexual exploitation, the tools are already used in other criminal enterprises. AI agents capable of relationship building could enable extortion schemes; code generation could automate &ldquo;nudifying&rdquo; software creation.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-teal-600 font-medium text-sm flex items-center gap-1.5 hover:text-teal-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Safety for agentic systems is an emerging field. Current work focuses on early detection and prevention of misuse, with most solutions relying on training models using examples of prior misuse such as AI-generated malware.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Developing &ldquo;nudification&rdquo; code or extortion prompts is ethically ambiguous, raising data legality and researcher wellness concerns. Robust evidence of misuse in child safety contexts may be a prerequisite for industry prioritization.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- OP15 -->
+          <article class="problem-card" data-tags="eval adv well">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">15</span>
+                <h4 class="text-lg font-bold text-slate-900">Assessing safeguards</h4>
+              </div>
+              <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                <span class="tag tag-eval">Evaluation</span>
+                <span class="tag tag-adv">Adversarial</span>
+                <span class="tag tag-well">Wellness</span>
+              </div>
+            </div>
+            <p class="text-slate-700 leading-relaxed mb-3 italic">
+              How do third-party auditors and users effectively assess the efficacy of implemented safeguards?
+            </p>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Even where safeguards have been implemented, assessing their effectiveness &mdash; individually and within the broader system context &mdash; is necessary for building trust and transparency.
+            </p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-teal-600 font-medium text-sm flex items-center gap-1.5 hover:text-teal-700">
+                <svg class="w-4 h-4 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                Learn more
+              </summary>
+              <div class="mt-3 space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-3">
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Existing Work</h5>
+                  <p>Most AI safety assessments focus on individual models through red teaming or benchmarks.</p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-800 mb-1">Limitations</h5>
+                  <p>Mechanisms for assessing complex AI systems are lacking. Sociotechnical assessments accounting for actual user engagement, offender behavior, and cross-platform dynamics remain uncommon. Companies may lack incentive to provide the access necessary for these studies.</p>
+                </div>
+              </div>
+            </details>
+          </article>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ────────── Calls to Action ────────── -->
+  <section id="action" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-slate-900 mb-3 text-center">Calls to Action</h2>
+      <p class="text-center text-slate-500 max-w-2xl mx-auto mb-12">
+        Targeted recommendations for researchers, AI providers, and policymakers to bridge the gap between AI safety and child protection.
+      </p>
+
+      <!-- Tabs -->
+      <div class="border-b border-slate-200 mb-10">
+        <div class="flex gap-0 overflow-x-auto">
+          <button data-tab="researchers" class="tab-btn tab-active whitespace-nowrap">Researchers</button>
+          <button data-tab="providers" class="tab-btn whitespace-nowrap">AI Providers</button>
+          <button data-tab="policymakers" class="tab-btn whitespace-nowrap">Policymakers</button>
+        </div>
+      </div>
+
+      <!-- Researchers Panel -->
+      <div data-tab-panel="researchers">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>Model Development
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Assess partial data cleaning limits using proxy datasets; explore architectures preventing unwanted concept fusion</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Build self-destructing models targeting the &ldquo;nudifying&rdquo; ecosystem</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Create mechanisms to obstruct harmful fine-tuning without access to harmful material</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Develop robust content provenance (e.g., models that degrade if fine-tuned to remove a watermark)</li>
+            </ul>
+          </div>
+          <div class="bg-sky-50/50 border border-sky-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>Deployment
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Design image-free auditing to enable upstream detection</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Harden models to white-box attacks using natural-language safety specifications</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Develop training data extraction techniques that don&rsquo;t rely on direct prompting or model training</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Explore concept fusion via mechanistic interpretability to identify and downweight neurons enabling harmful combinations</li>
+            </ul>
+          </div>
+          <div class="bg-teal-50/50 border border-teal-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span>Maintenance
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Build solutions to detect &ldquo;nudifying&rdquo; applications</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Develop model hashing techniques robust to minor modifications</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Explore strategies providing strong guarantees when remediating/unlearning harmful models</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Establish image/video protection techniques for children&rsquo;s imagery using proxy data and concepts</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Providers Panel -->
+      <div data-tab-panel="providers" class="hidden">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>Model Development
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Engage CSAM survivors to understand perspectives on partial data cleaning and re-victimization</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Partner with hotlines and LE for secure, scoped CSAM access to implement fine-tuning resilience</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Reliably label model outputs with C2PA or equivalent standard and indelible watermarks</li>
+            </ul>
+          </div>
+          <div class="bg-sky-50/50 border border-sky-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>Deployment
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Join data sharing programs (e.g., Lantern) with trusted organizations to broaden access to adversarial prompts</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Deploy metadata and signals to detect policy-violating models; resource teams to meet upload/download volume</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Partner with external teams pre-deployment for model evaluation, sharing platform-specific offender behavior data</li>
+            </ul>
+          </div>
+          <div class="bg-teal-50/50 border border-teal-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span>Maintenance
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Partner with cross-industry child safety organizations (e.g., Tech Coalition) for cross-platform monitoring</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Partner with UGC platforms to evaluate strategies for protecting user imagery from AI manipulation</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Establish cross-industry consistency in policies and enforcement for identifying &amp; removing harmful third-party models</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Policymakers Panel -->
+      <div data-tab-panel="policymakers" class="hidden">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>Model Development
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Establish avenues for scoped, secure evaluation of AIG-CSAM capabilities by vetted institutions</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Resource standards organizations (e.g., NIST) to ensure content provenance guidance stays current</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Instruct regulators to engage with the fine-tuning software ecosystem</li>
+              <li class="flex gap-2"><span class="text-indigo-400 mt-1 flex-shrink-0">&bull;</span>Task grant-making institutions to prioritize AI child safety research</li>
+            </ul>
+          </div>
+          <div class="bg-sky-50/50 border border-sky-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>Deployment
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Resource institutions like NIST to establish pathways for public benchmarking of safety tech</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Pass legislation creating liability for intentional development or distribution of AIG-CSAM models</li>
+              <li class="flex gap-2"><span class="text-sky-400 mt-1 flex-shrink-0">&bull;</span>Require developers to disclose whether they conducted CSAM filtering on training data</li>
+            </ul>
+          </div>
+          <div class="bg-teal-50/50 border border-teal-100 rounded-xl p-6">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span>Maintenance
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Task regulators to review &ldquo;nudifying&rdquo; services for unfair, deceptive, and fraudulent business practices</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Mandate child safety specific impact and risk assessments for AI systems before deployment</li>
+              <li class="flex gap-2"><span class="text-teal-400 mt-1 flex-shrink-0">&bull;</span>Direct regulators to assess platform strategies for preventing distribution of harmful models, apps, and services</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── Citation ────────── -->
+  <section id="cite" class="py-20 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-slate-900 mb-3 text-center">Cite This Work</h2>
+      <p class="text-center text-slate-500 mb-10">If this work is useful to your research, please cite our paper.</p>
+
+      <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-200">
+          <span class="text-sm font-medium text-slate-600">BibTeX</span>
+          <button id="copy-bibtex" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre id="bibtex-content" class="p-5 text-sm text-slate-700 overflow-x-auto leading-relaxed">@article{openproblemschildsafety2025,
+  title={Open Problems in AI Child Safety},
+  author={Kale, Neil and Portnoff, Rebecca and Thaker, Pratiksha and Simpson, Michael and Wang, Rob and Kuo, Kevin and Yadav, Chhavi and Smith, Virginia},
+  year={2025},
+  url={TODO}
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── Footer ────────── -->
+  <footer class="bg-slate-900 text-slate-400 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="text-center md:text-left">
+          <p class="font-semibold text-white text-lg mb-1">Open Problems in AI Child Safety</p>
+          <p class="text-sm">Bridging AI safety research and child protection.</p>
+        </div>
+        <div class="flex gap-6 text-sm">
+          <a href="#" class="hover:text-white transition-colors">Paper</a>
+          <a href="#" class="hover:text-white transition-colors">GitHub</a>
+          <a href="#overview" class="hover:text-white transition-colors">Overview</a>
+          <a href="#problems" class="hover:text-white transition-colors">Problems</a>
+        </div>
+      </div>
+      <div class="mt-8 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <p class="text-sm">&copy; 2025. All rights reserved.</p>
+        <div class="flex items-center gap-8">
+          <img src="/src/assets/thorn_logo.png" alt="Thorn" class="h-7 object-contain" />
+          <img src="/src/assets/cmu_logo.png" alt="Carnegie Mellon University" class="h-8 object-contain" />
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
