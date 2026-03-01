@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Problems in AI Child Safety — Hero Figure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .figure {
+      width: 1920px;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 56px 72px 48px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header h1 {
+      font-size: 52px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+    }
+
+    .header .subtitle {
+      margin-top: 14px;
+      font-size: 19px;
+      color: #64748b;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    .header .subtitle strong {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phase {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 28px 28px 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .phase-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .phase-develop .phase-icon { background: #eef2ff; }
+    .phase-deploy .phase-icon  { background: #e0f2fe; }
+    .phase-maintain .phase-icon { background: #ccfbf1; }
+
+    .phase-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    .phase-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    .phase-develop .phase-label { color: #6366f1; }
+    .phase-deploy .phase-label  { color: #0284c7; }
+    .phase-maintain .phase-label { color: #0d9488; }
+
+    .problems { display: flex; flex-direction: column; gap: 8px; }
+
+    .problem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    .problem-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .phase-develop .problem-num { background: #eef2ff; color: #4f46e5; }
+    .phase-deploy .problem-num  { background: #e0f2fe; color: #0369a1; }
+    .phase-maintain .problem-num { background: #ccfbf1; color: #0f766e; }
+
+    .problem-text {
+      flex: 1;
+      font-size: 17px;
+      font-weight: 500;
+      color: #334155;
+      line-height: 1.3;
+    }
+
+    .constraint-dots {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .dot-data { background: #3b82f6; }
+    .dot-eval { background: #f59e0b; }
+    .dot-adv  { background: #ef4444; }
+    .dot-well { background: #10b981; }
+
+    /* Arrows between columns */
+    .arrow-container {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+    .arrow-container.arrow-1 { left: calc(33.333% + 14px - 16px); }
+    .arrow-container.arrow-2 { left: calc(66.666% + 14px - 16px); }
+
+    .arrow-container svg {
+      width: 28px;
+      height: 28px;
+      color: #cbd5e1;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .legend-label {
+      font-size: 15.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin-right: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="figure">
+
+  <div class="header">
+    <h1>Open Problems in AI Child Safety</h1>
+    <p class="subtitle">
+      Existing AI safety techniques assume data accessibility, transparency, and open evaluation &mdash;
+      assumptions <strong>incompatible with child safety constraints</strong>.
+      We outline <strong>15 open problems</strong> across the AI lifecycle.
+    </p>
+  </div>
+
+  <div class="columns">
+
+    <!-- DEVELOP -->
+    <div class="phase phase-develop">
+      <div class="phase-header">
+        <div class="phase-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5.5 7.5 12 3l6.5 4.5"/><circle cx="12" cy="14" r="4"/></svg>
+        </div>
+        <div>
+          <div class="phase-label">Phase 1</div>
+          <div class="phase-title">Develop</div>
+        </div>
+      </div>
+      <div class="problems">
+        <div class="problem">
+          <div class="problem-num">1</div>
+          <div class="problem-text">Partial data cleaning</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-eval"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">2</div>
+          <div class="problem-text">Preventing concept fusion</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">3</div>
+          <div class="problem-text">Resilience to harmful fine-tuning</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">4</div>
+          <div class="problem-text">Minimizing human exposure</div>
+          <div class="constraint-dots">
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">5</div>
+          <div class="problem-text">Watermark robustness</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEPLOY -->
+    <div class="phase phase-deploy">
+      <div class="phase-header">
+        <div class="phase-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="phase-label">Phase 2</div>
+          <div class="phase-title">Deploy</div>
+        </div>
+      </div>
+      <div class="problems">
+        <div class="problem">
+          <div class="problem-num">6</div>
+          <div class="problem-text">Effective prompt/output detection</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">7</div>
+          <div class="problem-text">Automated model assessment</div>
+          <div class="constraint-dots">
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">8</div>
+          <div class="problem-text">Standardized safety assessments</div>
+          <div class="constraint-dots">
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">9</div>
+          <div class="problem-text">Model transparency</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">10</div>
+          <div class="problem-text">Hobbyist ecosystem</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINTAIN -->
+    <div class="phase phase-maintain">
+      <div class="phase-header">
+        <div class="phase-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div>
+          <div class="phase-label">Phase 3</div>
+          <div class="phase-title">Maintain</div>
+        </div>
+      </div>
+      <div class="problems">
+        <div class="problem">
+          <div class="problem-num">11</div>
+          <div class="problem-text">Identifying abliterated models</div>
+          <div class="constraint-dots">
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">12</div>
+          <div class="problem-text">Robust unlearning</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">13</div>
+          <div class="problem-text">Protecting user imagery</div>
+          <div class="constraint-dots">
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">14</div>
+          <div class="problem-text">Securing AI agents</div>
+          <div class="constraint-dots">
+            <div class="dot dot-data"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+        <div class="problem">
+          <div class="problem-num">15</div>
+          <div class="problem-text">Assessing safeguards</div>
+          <div class="constraint-dots">
+            <div class="dot dot-eval"></div>
+            <div class="dot dot-adv"></div>
+            <div class="dot dot-well"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrows between columns -->
+    <div class="arrow-container arrow-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </div>
+    <div class="arrow-container arrow-2">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">Key Challenges</span>
+    <div class="legend-item">
+      <div class="legend-dot dot-data"></div>
+      Data Restrictions
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot dot-eval"></div>
+      Evaluation Restrictions
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot dot-adv"></div>
+      Adversarial Environment
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot dot-well"></div>
+      Wellness Implications
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
